@@ -2,6 +2,34 @@
 #include <segmem.h>
 #include <string.h>
 
+#define c0_idx  1
+#define d0_idx  2
+#define c3_idx  3
+#define d3_idx  4
+#define ts_idx  5
+
+#define c0_sel  gdt_krn_seg_sel(c0_idx)
+#define d0_sel  gdt_krn_seg_sel(d0_idx)
+#define c3_sel  gdt_usr_seg_sel(c3_idx)
+#define d3_sel  gdt_usr_seg_sel(d3_idx)
+#define ts_sel  gdt_krn_seg_sel(ts_idx)
+
+seg_desc_t GDT[6];
+tss_t      TSS;
+
+#define gdt_flat_dsc(_dSc_,_pVl_,_tYp_)                                 \
+   ({                                                                   \
+      (_dSc_)->raw     = 0;                                             \
+      (_dSc_)->limit_1 = 0xffff;                                        \
+      (_dSc_)->limit_2 = 0xf;                                           \
+      (_dSc_)->type    = _tYp_;                                         \
+      (_dSc_)->dpl     = _pVl_;                                         \
+      (_dSc_)->d       = 1;                                             \
+      (_dSc_)->g       = 1;                                             \
+      (_dSc_)->s       = 1;                                             \
+      (_dSc_)->p       = 1;                                             \
+   })
+
 #define tss_dsc(_dSc_,_tSs_)                                            \
    ({                                                                   \
       raw32_t addr    = {.raw = _tSs_};                                 \
@@ -13,61 +41,30 @@
       (_dSc_)->p      = 1;                                              \
    })
 
-seg_desc_t my_gdt[5];
-int gdt_idx;
-
-void add_descriptor(int base, int limit, int type, char dpl) {
-    // limit
-    my_gdt[gdt_idx].limit_1 = (uint16_t) limit;	 	// bits 00-15
-    my_gdt[gdt_idx].limit_2 = (limit >> 16) & (1 << 4); // bits 16-19
-
-    // base
-    my_gdt[gdt_idx].base_1 = (uint16_t) base;	 	// bits 00-15
-    my_gdt[gdt_idx].base_2 = (uint8_t) (base >> 16); 	// bits 16-23
-    my_gdt[gdt_idx].base_2 = (uint8_t) (base >> 24); 	// bits 24-31
-
-    my_gdt[gdt_idx].type = type;      /* segment type */
-    my_gdt[gdt_idx].dpl = dpl;        /* descriptor privilege level */
-
-    my_gdt[gdt_idx].s = 1;            /* descriptor type */
-    my_gdt[gdt_idx].p = 1;            /* segment present flag */
-    my_gdt[gdt_idx].avl = 1;          /* available for fun and profit */
-    my_gdt[gdt_idx].l = 0;            /* longmode */
-    my_gdt[gdt_idx].d = 1;            /* default length, depend on seg type */
-    my_gdt[gdt_idx].g = 1;            /* granularity */
-
-    gdt_idx++;
-}
+#define c0_dsc(_d) gdt_flat_dsc(_d,0,SEG_DESC_CODE_XR)
+#define d0_dsc(_d) gdt_flat_dsc(_d,0,SEG_DESC_DATA_RW)
+#define c3_dsc(_d) gdt_flat_dsc(_d,3,SEG_DESC_CODE_XR)
+#define d3_dsc(_d) gdt_flat_dsc(_d,3,SEG_DESC_DATA_RW)
 
 void init_seg() {
-    // fill gdt
-    my_gdt[gdt_idx++].raw = 0ULL;
-    add_descriptor(0, 0xfffff, 11, 0);
-    add_descriptor(0, 0xfffff,  3, 0);
+   gdt_reg_t gdtr;
 
-    add_descriptor(0, 0xfffff, 11, 3);
-    add_descriptor(0, 0xfffff,  3, 3);
+   GDT[0].raw = 0ULL;
 
-    // set gdtr
-    gdt_reg_t my_gdtr;
-    my_gdtr.addr = (long unsigned int)my_gdt;
-    my_gdtr.limit = sizeof(my_gdt) - 1;
-    set_gdtr(my_gdtr);
+   c0_dsc( &GDT[c0_idx] );
+   d0_dsc( &GDT[d0_idx] );
+   c3_dsc( &GDT[c3_idx] );
+   d3_dsc( &GDT[d3_idx] );
 
-    // set descriptors
-    set_ds(gdt_usr_seg_sel(5));
-    set_es(gdt_usr_seg_sel(5));
-    set_fs(gdt_usr_seg_sel(5));
-    set_gs(gdt_usr_seg_sel(5));
+   gdtr.desc  = GDT;
+   gdtr.limit = sizeof(GDT) - 1;
+   set_gdtr(gdtr);
 
-    // set ss
-    // TODO CHECK HERE DUNNO WHAT IM DOING
-    tss_t TSS;
-    TSS.s0.esp = get_ebp();
-    TSS.s0.ss  = gdt_krn_seg_sel(2);
-    tss_dsc(&my_gdt[6], (offset_t)&TSS);
-    set_tr(gdt_krn_seg_sel(6));
- 
-    // set cs
-    // cf tp3
+   set_cs(c0_sel);
+
+   set_ss(d0_sel);
+   set_ds(d0_sel);
+   set_es(d0_sel);
+   set_fs(d0_sel);
+   set_gs(d0_sel);
 }

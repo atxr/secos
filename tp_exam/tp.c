@@ -6,5 +6,8 @@
 
 void tp() {
 	init_seg();
+	debug("Segmentation OK.\n");
+
 	init_syscall();
+	debug("Syscalls OK.\n");
 }
