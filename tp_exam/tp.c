@@ -3,11 +3,15 @@
 
 #include "seg.c"
 #include "int.c"
+#include "tasks.c"
 
 void tp() {
-	init_seg();
+	init_flat_seg();
 	debug("Segmentation OK.\n");
 
 	init_syscall();
 	debug("Syscalls OK.\n");
+
+	init_task1();
+	debug("Task 1 OK.\n");
 }

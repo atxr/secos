@@ -46,7 +46,7 @@ tss_t      TSS;
 #define c3_dsc(_d) gdt_flat_dsc(_d,3,SEG_DESC_CODE_XR)
 #define d3_dsc(_d) gdt_flat_dsc(_d,3,SEG_DESC_DATA_RW)
 
-void init_seg() {
+void init_flat_seg() {
    gdt_reg_t gdtr;
 
    GDT[0].raw = 0ULL;
