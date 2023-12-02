@@ -12,6 +12,6 @@ void tp() {
 	init_syscall();
 	debug("Syscalls OK.\n");
 
-	init_task1();
+	init_pagination();
 	debug("Task 1 OK.\n");
 }
