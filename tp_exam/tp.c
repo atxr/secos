@@ -4,6 +4,7 @@
 #include "seg.c"
 #include "int.c"
 #include "tasks.c"
+#include "pagin.c"
 
 void tp() {
 	init_flat_seg();
@@ -13,5 +14,5 @@ void tp() {
 	debug("Syscalls OK.\n");
 
 	init_pagination();
-	debug("Task 1 OK.\n");
+	debug("Pagination OK.\n");
 }
