@@ -28,10 +28,10 @@ SECTIONS
 
    __kernel_end__ = .;
    
-   . = ALIGN(0x400000);
-   __user_start__ = .;
    
-   .user      : { *(.user) 	} : phsetup
+   __user_start__ = .;
+   . = ALIGN(0x400000);
+   .user      : { *(.user) . = ALIGN(0x100000);	} : phsetup
    .user_data : { *(.user_data) } : phsetup
    
    __user_end__ = .;
