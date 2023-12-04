@@ -67,12 +67,12 @@ void init_pagination() {
 	debug("============== PAGINATION ACTIVATED ===============\n");
 }
 
-int task1() {
+__attribute__((section(".user"))) int task1() {
 	debug("Running task1\n");
 	for(;;) {}
 }
 
-int task2() {
+__attribute__((section(".user"))) int task2() {
 	debug("Running task2\n");
 	for(;;) {}
 }

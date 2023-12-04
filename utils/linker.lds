@@ -27,4 +27,12 @@ SECTIONS
    /DISCARD/ : { *(.note* .indent .comment)      } : phsetup
 
    __kernel_end__ = .;
+   
+   . = ALIGN(0x400000);
+   __user_start__ = .;
+   
+   .user      : { *(.user) 	} : phsetup
+   .user_data : { *(.user_data) } : phsetup
+   
+   __user_end__ = .;
 }
