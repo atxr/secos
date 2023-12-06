@@ -10,6 +10,7 @@ void reg_syscall(int int_num, int handler) {
     dsc = &idtr.desc[int_num];
     dsc->offset_1 = (uint16_t)((uint32_t)handler); 
     dsc->offset_2 = (uint16_t)(((uint32_t)handler)>>16);
+    dsc->dpl = 3;
 }
 
 void init_syscall() {

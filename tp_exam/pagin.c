@@ -25,6 +25,8 @@ static pte32_t *ptb21 = (pte32_t*) T2_PTB1;
 
 #endif
 
+void trigger1() {}
+
 // Init PGD/PTB and activate pagination for task1
 // 
 // Task 1:
@@ -45,18 +47,22 @@ void init_pagination() {
 	// set two ptb for id mapped areas
 	for(int i=0;i<1024;i++) {
 	 	pg_set_entry(&ptb10[i], PG_KRN|PG_RW, i);
-	 	pg_set_entry(&ptb11[i], PG_RW, 1024 + i);
+	 	pg_set_entry(&ptb11[i], PG_USR|PG_RW, 1024 + i);
 	 	
 	 	pg_set_entry(&ptb20[i], PG_KRN|PG_RW, i);
-	 	pg_set_entry(&ptb21[i], PG_RW, 2*1024 + i);
+	 	pg_set_entry(&ptb21[i], PG_USR|PG_RW, 2*1024 + i);
 	}
+	
+	debug("MEGATETS %d\n", PG_USR|PG_RW);
 
 	// set ptbs
 	pg_set_entry(&pgd1[0], PG_KRN|PG_RW, page_nr(ptb10));
-	pg_set_entry(&pgd1[1], PG_RW, page_nr(ptb11));
+	pg_set_entry(&pgd1[1], PG_USR|PG_RW, page_nr(ptb11));
 	
 	pg_set_entry(&pgd2[0], PG_KRN|PG_RW, page_nr(ptb20));
-	pg_set_entry(&pgd2[2], PG_RW, page_nr(ptb21));
+	pg_set_entry(&pgd2[2], PG_USR|PG_RW, page_nr(ptb21));
+	
+	trigger1();
 
 	// set cr3 and cr0
 	set_cr3((uint32_t)pgd1);
@@ -65,4 +71,17 @@ void init_pagination() {
 	set_cr0(cr0 | CR0_PG);
 
 	debug("============== PAGINATION ACTIVATED FOR TASK 1 ===============\n");
+}
+
+void debug_pagination(int address) {
+	int pdeidx = pd32_idx(address);
+	int pteidx = pt32_idx(address);
+	
+	cr3_reg_t cr3 = {.raw = get_cr3()};
+	pde32_t* pde = (pde32_t*) (cr3.addr << 12);
+	pte32_t* pte = (pte32_t*) (pde[pdeidx].addr << 12);
+
+	int pdelvl = pde[pdeidx].lvl;
+	int ptelvl = pte[pteidx].lvl;
+	debug("Pagination privilege lvl: PGD#%d:%d and PTB#%d:%d\n", pdeidx, pdelvl, pteidx, ptelvl);
 }

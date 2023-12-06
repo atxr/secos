@@ -27,15 +27,19 @@ void switch_task() {
 	// TODO
 }
 
+__user_data__ const char* plswork = "Running task1\n";
+
 __attribute__((section(".user"))) int task1() {
-	debug("Running task1\n");
+	//debug(plswork);
 	for(;;) {}
 }
 
 __attribute__((section(".user"))) int task2() {
-	debug("Running task2\n");
+	//debug(plswork);
 	for(;;) {}
 }
+
+void trigger() {}
 
 void run_ring3() {
 	init_flat_seg();
@@ -57,6 +61,15 @@ void run_ring3() {
 	init_syscall();
 	debug("Syscalls OK.\n");
 
+	// DEBUG
+	debug_gdt();
+	debug("SS: %d\nStack @ %p\nCS: %d\neip @ %p\n", d3_idx, stack1, c3_idx, task2);
+
+	debug_pagination((int)task1);
+	// DEBUG
+	
+	trigger();
+	
     asm volatile (
       "push %0 \n" // ss
       "push %1 \n" // esp pour du ring 3 !
@@ -68,6 +81,6 @@ void run_ring3() {
        "i"(d3_sel),
        "m"(stack1),
        "i"(c3_sel),
-       "r"(&task2)
+       "r"(0x400000)
       );
 }
