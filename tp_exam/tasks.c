@@ -7,7 +7,10 @@
 #define __user_data__ 	__attribute__ ((section(".user_data"),aligned(4)))
 
 #define T1_STACK	0x500000
+#define T1_SHARED_MEM	0x800000
+
 #define T2_STACK	0x600000
+#define T2_SHARED_MEM	0x400000
 
 static int* __user_data__ stack1 = (int*) (T1_STACK + 0x80000);
 static int* __user_data__ stack2 = (int*) (T2_STACK + 0x80000);
@@ -27,15 +30,17 @@ void switch_task() {
 	// TODO
 }
 
-__user_data__ const char* plswork = "Running task1\n";
-
-__attribute__((section(".user"))) int task1() {
-	//debug(plswork);
+__attribute__((section(".user"))) void task1() {
+	uint32_t* counter = (uint32_t*) T1_SHARED_MEM;
+	*counter += 1;
+	
 	for(;;) {}
 }
 
-__attribute__((section(".user"))) int task2() {
-	//debug(plswork);
+__attribute__((section(".user"))) void task2() {
+	uint32_t* counter =  (uint32_t*) T2_SHARED_MEM;
+   	asm volatile ("int $0x80"::"a"(counter));
+   	
 	for(;;) {}
 }
 
@@ -47,7 +52,7 @@ void run_ring3() {
 
 	init_pagination();
 	debug("Pagination OK.\n");
-	
+
 	// Switch seg to ring 3
 	set_ds(d3_sel);
     set_es(d3_sel);
