@@ -34,7 +34,12 @@ core_obj   :=	entry.o \
 		intr.o	\
 		idt.o	\
 		excp.o	\
-		stack.o
+		stack.o	\
+		user.o 	\
+		process.o \
+		timer.o \
+		segmem.o \
+		memory_map.o
 
 objects    := $(addprefix $(CORE), $(core_obj))
 
