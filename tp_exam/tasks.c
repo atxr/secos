@@ -6,10 +6,10 @@
 
 #define __user_data__ 	__attribute__ ((section(".user_data"),aligned(4)))
 
-#define T1_STACK	0x500000
+#define T1_STACK		0x500000
 #define T1_SHARED_MEM	0x800000
 
-#define T2_STACK	0x600000
+#define T2_STACK		0x600000
 #define T2_SHARED_MEM	0x400000
 
 static int* __user_data__ stack1 = (int*) (T1_STACK + 0x80000);
@@ -32,7 +32,12 @@ void switch_task() {
 
 __attribute__((section(".user"))) void task1() {
 	uint32_t* counter = (uint32_t*) T1_SHARED_MEM;
-	*counter += 1;
+	*counter += 10;
+	
+   	asm volatile ("int $0x80"::"a"(counter));
+	*counter += 10;
+	
+   	asm volatile ("int $0x80"::"a"(counter));
 	
 	for(;;) {}
 }
@@ -74,6 +79,8 @@ void run_ring3() {
 	// DEBUG
 	
 	trigger();
+	
+	debug_pagination((int)T1_SHARED_MEM);
 	
     asm volatile (
       "push %0 \n" // ss
