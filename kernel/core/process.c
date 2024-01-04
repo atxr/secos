@@ -27,7 +27,7 @@ void create_process(process_t p)
     process_list_len++;
 }
 
-void ack_and_run_user_process(int id)
+void run_user_process(int id)
 {
     debug("Run user task %d\n", id);
 
@@ -43,9 +43,8 @@ void ack_and_run_user_process(int id)
         "m"(process_list[id].esp),
         "i"(c3_sel),
         "r"(process_list[id].entry));
-
-    outb(0x20, 0x20); // ack IRQ0
-    asm volatile("iret");
+    
+    asm volatile("sti\n iret");
 }
 
 process_t *get_process_list()

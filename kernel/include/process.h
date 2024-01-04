@@ -18,7 +18,7 @@ typedef struct process_t
 
 void init_process_table();
 void create_process(process_t p);
-void ack_and_run_user_process(int id);
+void run_user_process(int id);
 
 process_t *get_process_list();
 int get_process_list_len();

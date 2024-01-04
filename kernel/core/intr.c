@@ -67,20 +67,24 @@ void isr_count()
 void __regparm__(1) sys_handler_count(int_ctx_t *ctx)
 {
    uint32_t *counter = (uint32_t *)ctx->gpr.eax.raw;
-   debug("SYSCALL count:\n@counter = %p\ncounter = %d\n", counter, *counter);
+   debug("counter = %d\n", *counter);
 }
 
 void isr_switch()
 {
    asm volatile(
-       "leave ; pusha        \n"
+       "leave ; pusha ; cli     \n"
        "call sys_handler_switch \n"
        "popa ; iret");
 }
 
 void sys_handler_switch()
 {
+   outb(0x20, 0x20); // ack IRQ0
+
+   debug("SYS HANDLER SWITCH\n");
    int len = get_process_list_len();
+
    // Only kernel is running
    if (len == 1)
       goto exit;
@@ -88,6 +92,7 @@ void sys_handler_switch()
    process_t *process_list = get_process_list();
    int current_process = get_current_process();
    int new_process = (current_process + 1) % len;
+   debug("Switching from %d to %d\n", current_process, new_process);
 
    // Save current esp
    process_list[current_process].esp = get_esp();
@@ -116,11 +121,11 @@ void sys_handler_switch()
    else
    {
       process_list[new_process].started = true;
-      ack_and_run_user_process(new_process);
+      run_user_process(new_process);
    }
 
 exit:
-   outb(0x20, 0x20); // ack IRQ0
+   asm volatile("sti");
 }
 
 void reg_syscall(int int_num, int isr)
