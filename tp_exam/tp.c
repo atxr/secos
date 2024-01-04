@@ -8,8 +8,8 @@
 #include <timer.h>
 #include <asm.h>
 
-int *__user_data__ stack1 = (int *)(T1_STACK + 0x80000);
-int *__user_data__ stack2 = (int *)(T2_STACK + 0x80000);
+uint32_t stack1 = T1_STACK + 0x80000;
+uint32_t stack2 = T2_STACK + 0x80000;
 
 void init_kernel()
 {
@@ -23,7 +23,7 @@ void init_kernel()
 
     //* DEBUG
     debug_gdt();
-    debug("SS: %d\nStack @ %p\nCS: %d\neip @ %p\n", d3_idx, stack1, c3_idx, task2);
+    debug("SS: %d\nStack @ 0x%x\nCS: %d\neip @ %p\n", d3_idx, stack1, c3_idx, task2);
     debug_pagination((int)task1);
     debug_pagination((int)T1_SHARED_MEM);
     //*/
@@ -53,7 +53,6 @@ void tp()
 {
     init_kernel();
     init_processes();
-    run_user_process(1);
 
     for (;;)
     {

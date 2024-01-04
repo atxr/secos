@@ -85,10 +85,39 @@ void sys_handler_switch()
    if (len == 1)
       goto exit;
 
-   int new_process = (get_current_process() + 1) % len;
+   process_t *process_list = get_process_list();
+   int current_process = get_current_process();
+   int new_process = (current_process + 1) % len;
 
-   // switch_process(new_process);
-   debug("SYSCALL switch to process %d\n", new_process);
+   // Save current esp
+   process_list[current_process].esp = get_esp();
+
+   // Set new pagination
+   pde32_t *new_pgd;
+   if (new_process == 2)
+   {
+      new_pgd = get_pgd2();
+   }
+   else
+   {
+      new_pgd = get_pgd1();
+   }
+
+   set_cr3(new_pgd);
+   set_current_process(new_process);
+
+   // If process running, resume
+   if (process_list[new_process].started)
+   {
+      set_esp(process_list[new_process].esp);
+   }
+
+   // Else start user process
+   else
+   {
+      process_list[new_process].started = true;
+      ack_and_run_user_process(new_process);
+   }
 
 exit:
    outb(0x20, 0x20); // ack IRQ0
