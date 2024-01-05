@@ -7,7 +7,13 @@ __attribute__((section(".user"))) void task1()
 	for (;;)
 	{
 		*counter += 1;
-		// asm volatile("int $0x80" ::"a"(counter));
+
+		// TODO
+		// Comment the following line to test the real behavior
+		asm volatile("int $0x80" ::"a"(counter));
+		// Because task switching is not working, I let this line uncommented
+		// to see the behavior of task1
+		// I know... That's cheating :/
 	}
 }
 
