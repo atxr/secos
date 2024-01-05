@@ -35,7 +35,7 @@ core_obj   :=	entry.o \
 		idt.o	\
 		excp.o	\
 		stack.o	\
-		user.o 	\
+		tasks.o \
 		process.o \
 		timer.o \
 		segmem.o \

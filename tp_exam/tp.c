@@ -1,6 +1,6 @@
 /* GPLv2 (c) Airbus */
 #include <debug.h>
-#include <user.h>
+#include <tasks.h>
 #include <process.h>
 #include <io.h>
 #include <segmem.h>

@@ -3,9 +3,7 @@
 #include <memory_map.h>
 
 seg_desc_t GDT[8];
-tss_t TSS0;
-tss_t TSS1;
-tss_t TSS2;
+tss_t TSS;
 
 void set_seg_for_task(int pid)
 {
@@ -18,11 +16,11 @@ void set_seg_for_task(int pid)
 
         if (pid == 1)
         {
-            TSS0.s0.esp = KERNEL_STACK1;
+            TSS.s0.esp = KERNEL_STACK1;
         }
         else
         {
-            TSS0.s0.esp = KERNEL_STACK2;
+            TSS.s0.esp = KERNEL_STACK2;
         }
     }
 
@@ -45,9 +43,7 @@ void init_flat_seg()
     d0_dsc(&GDT[d0_idx]);
     c3_dsc(&GDT[c3_idx]);
     d3_dsc(&GDT[d3_idx]);
-    tss_dsc(&GDT[ts0_idx], (offset_t)&TSS0);
-    tss_dsc(&GDT[ts1_idx], (offset_t)&TSS1);
-    tss_dsc(&GDT[ts2_idx], (offset_t)&TSS2);
+    tss_dsc(&GDT[tss_idx], (offset_t)&TSS);
 
     gdtr.desc = GDT;
     gdtr.limit = sizeof(GDT) - 1;
@@ -61,10 +57,10 @@ void init_flat_seg()
     set_fs(d0_sel);
     set_gs(d0_sel);
 
-    TSS0.s0.esp = KERNEL_STACK1;
-    TSS0.s0.ss = d0_sel;
+    TSS.s0.esp = KERNEL_STACK1;
+    TSS.s0.ss = d0_sel;
 
-    set_tr(ts0_sel);
+    set_tr(tss_sel);
 }
 
 void print_gdt_content(gdt_reg_t gdtr_ptr)

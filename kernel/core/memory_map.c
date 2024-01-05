@@ -14,10 +14,6 @@ pte32_t *ptb20 = (pte32_t *)T2_PTB0;
 pte32_t *ptb21 = (pte32_t *)T2_PTB1;
 pte32_t *ptb22 = (pte32_t *)T2_PTB2;
 
-// uint32_t kernel_stack1_base = T0_STACK + (STACK_SIZE - 1) * sizeof(uint32_t);
-// uint32_t kernel_stack1_base = T1_KERNEL_STACK + (STACK_SIZE - 1) * sizeof(uint32_t);
-// uint32_t kernel_stack2_base = T2_KERNEL_STACK + (STACK_SIZE - 1) * sizeof(uint32_t);
-
 // Init PGD/PTB and activate pagination for task1
 //
 // Task 1:
@@ -107,36 +103,3 @@ pde32_t *get_pgd(int id)
         return pgd2;
     }
 }
-
-// uint32_t kernel_stack0_base;
-// uint32_t set_kernel_stack(int id, uint32_t stack)
-// {
-//     if (id == 0)
-//     {
-//         kernel_stack0_base = stack;
-//     }
-//     else if (id == 1)
-//     {
-//         kernel_stack1_base = stack;
-//     }
-//     else
-//     {
-//         kernel_stack2_base = stack;
-//     }
-// }
-
-// uint32_t get_kernel_stack(int id)
-// {
-//     if (id == 0)
-//     {
-//         return kernel_stack0_base;
-//     }
-//     else if (id == 1)
-//     {
-//         return kernel_stack1_base;
-//     }
-//     else
-//     {
-//         return kernel_stack2_base;
-//     }
-// }

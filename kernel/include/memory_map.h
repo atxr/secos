@@ -21,12 +21,9 @@
 #define T2_PTB2 0x393000
 
 // Stacks
-
 #define KERNEL_STACK1 0x3b0000
 #define KERNEL_STACK2 0x3d0000
 #define T0_STACK 0x3b0000
-#define T1_KERNEL_STACK 0x3d0000
-#define T2_KERNEL_STACK 0x3e0000
 
 // Userland memory areas
 #define __user1_data__ __attribute__((section(".user1_data"), aligned(4)))

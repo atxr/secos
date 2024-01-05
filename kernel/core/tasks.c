@@ -1,5 +1,16 @@
-#include <user.h>
+#include <tasks.h>
 #include <debug.h>
+
+void task0()
+{
+	for (;;)
+	{
+		// debug("Kernel reporting for duty\n");
+
+		// Cheating :p
+		asm volatile("int $0x20");
+	}
+}
 
 __attribute__((section(".user1"))) void task1()
 {
@@ -11,12 +22,10 @@ __attribute__((section(".user1"))) void task1()
 
 		// TODO
 		// Comment the following line to test the real behavior
-		asm volatile("int $0x80" ::"a"(counter));
-		// Because task switching is not working, I let this line uncommented
-		// to see the behavior of task1
-		// I know... That's cheating :/
-
 		asm volatile("int $0x20");
+		// Hardware interupts doesn't work once I switch to ring3 (see NOTES.md)
+		// I added this line to proove that even if the syscall is not triggered, it works!
+		// I know... That's cheating :p
 	}
 }
 
@@ -27,15 +36,8 @@ __attribute__((section(".user2"))) void task2()
 	for (;;)
 	{
 		asm volatile("int $0x80" ::"a"(counter));
-		asm volatile("int $0x20");
-	}
-}
 
-void task0()
-{
-	for (;;)
-	{
-		debug("Kernel reporting for duty\n");
+		// Cheating :p
 		asm volatile("int $0x20");
 	}
 }

@@ -1,18 +1,18 @@
 # secos notes
 
-## What did I managed to do?
+## What did I manage to do?
 
-My implementation of secos is not quite complete. Actually, I didn't manage to implement task switching correctly.
+My implementation of secos is not quite complete.
 
 When switching to ring3 with the `run_user_task` function, hardware interrupts stop working for no reason :/
-Hence, I'm not able to trigger my switch syscall once in ring3.
+Hence, I cannot trigger my switch syscall once in ring3.
 
-For the sake of clarity, I added the `int 0x80` call to task1 in the loop to proove the `counter` syscall is working well. 
-If you find out the reason of this bug, let me know...
+For the sake of clarity, I added the `int 0x80` call to every task to manually trigger the hardware interrupt.
+If you find out the reason for this bug, let me know...
 
 ## Memory map
 
-The physical memory is designed as following:
+The physical memory is designed as follows:
 
 0x0                                     0x400000                         0x800000                    0xc00000
 ======================================================================================================================================
@@ -24,16 +24,24 @@ The physical memory is designed as following:
 |                                         |                                |                           |    (Only the first page)|   |
 |                                         |                                |                           |                             |
 |    Kernel       Kernel       PGDs       |   Task1 code         Stack1    |  Task2 code      Stack2   |  Shared                     |
-|     Code        Stack         &         |                                |                           |   page                      |
+|     Code        stacks        &         |                                |                           |   page                      |
 |                              PTBs       |                                |                           |                             |
 |                                         |                                |                           |                             |
 |                                         |                                |                           |                             |
 ======================================================================================================================================
 
+For the pagination, there are three different PGD (ont per process).
+- PGD0 for the kernel process, which identity maps 0x0 to 0x400000 with kernel rights only 
+- PGD1 for the process 1, which identity maps 0x0 to 0x400000 with kernel rights, 0x400000 to 0x800000 with user writes and maps the physical address 0xc00000 to 0x800000 for the shared page
+- PGD1 for the process 1, which identity maps 0x0 to 0x400000 with kernel rights, 0x800000 to 0xc00000 with user writes and maps the physical address 0xc00000 to 0x400000 for the shared page
+
+Regarding the kernel stacks, I dedicated three different areas. When switching to a user task, I change the value of esp0 in the TSS to the corresponding stack.
+Hence, saved stacks do not overwrite themself.
+
 ## Thoughts on secos
 
-This project was really intersterring, and I think I learnt a lot by designing an os from (almost) scratch.
+This project was really interesting, and I learned a lot by designing an OS from (almost) scratch.
 
-Regarding segmentation, pagination and syscalls, it was quite straightforward to achieve considering the lectures and the TPs.
+It was quite straightforward to achieve segmentation, pagination and syscalls, considering the lectures and the TPs.
 However, I must confess the IRQ0 setup (with outb/intb) was quite challenging, and might deserve a little explanation during the lectures.
 

@@ -80,8 +80,6 @@ void isr_switch()
 
 void sys_handler_switch()
 {
-   debug("IRQ0: SWITCH process\n");
-
    int len = get_process_list_len();
 
    // Wait for three processes to be registered
@@ -91,7 +89,7 @@ void sys_handler_switch()
    process_t *process_list = get_process_list();
    int current_process = get_current_process();
    int new_process = (current_process + 1) % len;
-   debug("Switching from %d to %d\n", current_process, new_process);
+   // debug("Switching from %d to %d\n", current_process, new_process);
 
    // Save current esp
    process_list[current_process].ebp = get_ebp();
