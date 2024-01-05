@@ -1,6 +1,7 @@
 #include <user.h>
+#include <debug.h>
 
-__attribute__((section(".user"))) void task1()
+__attribute__((section(".user1"))) void task1()
 {
 	uint32_t *counter = (uint32_t *)T1_SHARED_MEM;
 
@@ -14,15 +15,27 @@ __attribute__((section(".user"))) void task1()
 		// Because task switching is not working, I let this line uncommented
 		// to see the behavior of task1
 		// I know... That's cheating :/
+
+		asm volatile("int $0x20");
 	}
 }
 
-__attribute__((section(".user"))) void task2()
+__attribute__((section(".user2"))) void task2()
 {
 	uint32_t *counter = (uint32_t *)T2_SHARED_MEM;
 
 	for (;;)
 	{
 		asm volatile("int $0x80" ::"a"(counter));
+		asm volatile("int $0x20");
+	}
+}
+
+void task0()
+{
+	for (;;)
+	{
+		debug("Kernel reporting for duty\n");
+		asm volatile("int $0x20");
 	}
 }

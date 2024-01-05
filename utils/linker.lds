@@ -31,8 +31,13 @@ SECTIONS
    
    __user_start__ = .;
    . = ALIGN(0x400000);
-   .user      : { *(.user) . = ALIGN(0x100000);	} : phsetup
-   .user_data : { *(.user_data) } : phsetup
-   
+   .user1      : { *(.user1) . = ALIGN(0x100000);	} : phsetup
+   .user1_data : { *(.user1_data) } : phsetup
+
+
+   . = ALIGN(0x800000);
+   .user2      : { *(.user2) . = ALIGN(0x100000);	} : phsetup
+   .user2_data : { *(.user2_data) } : phsetup
+
    __user_end__ = .;
 }

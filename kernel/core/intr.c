@@ -84,8 +84,8 @@ void sys_handler_switch()
 
    int len = get_process_list_len();
 
-   // Only kernel is running
-   if (len == 1)
+   // Wait for three processes to be registered
+   if (len != 3)
       goto exit;
 
    process_t *process_list = get_process_list();
@@ -94,33 +94,27 @@ void sys_handler_switch()
    debug("Switching from %d to %d\n", current_process, new_process);
 
    // Save current esp
-   process_list[current_process].esp = get_esp();
+   process_list[current_process].ebp = get_ebp();
+
+   // set new segmentation
+   set_seg_for_task(new_process);
 
    // Set new pagination
-   pde32_t *new_pgd;
-   if (new_process == 2)
-   {
-      new_pgd = get_pgd2();
-   }
-   else
-   {
-      new_pgd = get_pgd1();
-   }
-
+   pde32_t *new_pgd = get_pgd(new_process);
    set_cr3(new_pgd);
    set_current_process(new_process);
 
    // If process running, resume
    if (process_list[new_process].started)
    {
-      set_esp(process_list[new_process].esp);
+      set_ebp(process_list[new_process].ebp);
    }
 
    // Else start user process
    else
    {
       process_list[new_process].started = true;
-      run_user_process(new_process);
+      run_process(new_process);
    }
 
 exit:

@@ -287,13 +287,15 @@ typedef struct task_state_segment
 #define d0_idx 2
 #define c3_idx 3
 #define d3_idx 4
-#define ts1_idx 5
-#define ts2_idx 6
+#define ts0_idx 5
+#define ts1_idx 6
+#define ts2_idx 7
 
 #define c0_sel gdt_krn_seg_sel(c0_idx)
 #define d0_sel gdt_krn_seg_sel(d0_idx)
 #define c3_sel gdt_usr_seg_sel(c3_idx)
 #define d3_sel gdt_usr_seg_sel(d3_idx)
+#define ts0_sel gdt_krn_seg_sel(ts0_idx)
 #define ts1_sel gdt_krn_seg_sel(ts1_idx)
 #define ts2_sel gdt_krn_seg_sel(ts2_idx)
 
@@ -326,7 +328,7 @@ typedef struct task_state_segment
 #define c3_dsc(_d) gdt_flat_dsc(_d, 3, SEG_DESC_CODE_XR)
 #define d3_dsc(_d) gdt_flat_dsc(_d, 3, SEG_DESC_DATA_RW)
 
-void set_seg_to_user();
+void set_seg_for_task(int id);
 void init_flat_seg();
 void print_gdt_content(gdt_reg_t gdtr_ptr);
 void debug_gdt();

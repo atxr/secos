@@ -1,6 +1,9 @@
 #include <memory_map.h>
 #include <debug.h>
 
+pde32_t *pgd0 = (pde32_t *)T0_PGD;
+pte32_t *ptb0 = (pte32_t *)T0_PTB0;
+
 pde32_t *pgd1 = (pde32_t *)T1_PGD;
 pte32_t *ptb10 = (pte32_t *)T1_PTB0;
 pte32_t *ptb11 = (pte32_t *)T1_PTB1;
@@ -10,6 +13,10 @@ pde32_t *pgd2 = (pde32_t *)T2_PGD;
 pte32_t *ptb20 = (pte32_t *)T2_PTB0;
 pte32_t *ptb21 = (pte32_t *)T2_PTB1;
 pte32_t *ptb22 = (pte32_t *)T2_PTB2;
+
+// uint32_t kernel_stack1_base = T0_STACK + (STACK_SIZE - 1) * sizeof(uint32_t);
+// uint32_t kernel_stack1_base = T1_KERNEL_STACK + (STACK_SIZE - 1) * sizeof(uint32_t);
+// uint32_t kernel_stack2_base = T2_KERNEL_STACK + (STACK_SIZE - 1) * sizeof(uint32_t);
 
 // Init PGD/PTB and activate pagination for task1
 //
@@ -24,6 +31,8 @@ pte32_t *ptb22 = (pte32_t *)T2_PTB2;
 // - Task2 id mapped 0x800000 - 0xc00000
 void init_pagination()
 {
+    __clear_page(pgd0);
+    __clear_page(ptb0);
     __clear_page(pgd1);
     __clear_page(ptb10);
     __clear_page(ptb11);
@@ -36,6 +45,8 @@ void init_pagination()
     // set two ptb for id mapped areas
     for (int i = 0; i < 1024; i++)
     {
+        pg_set_entry(&ptb0[i], PG_KRN | PG_RW, i);
+
         pg_set_entry(&ptb10[i], PG_KRN | PG_RW, i);
         pg_set_entry(&ptb11[i], PG_USR | PG_RW, 1024 + i);
 
@@ -48,6 +59,8 @@ void init_pagination()
     pg_set_entry(&ptb21[0], PG_USR | PG_RW, SHARED_MEM >> 12);
 
     // set ptbs
+    pg_set_entry(&pgd0[0], PG_KRN | PG_RW, page_nr(ptb0));
+
     pg_set_entry(&pgd1[0], PG_KRN | PG_RW, page_nr(ptb10));
     pg_set_entry(&pgd1[1], PG_USR | PG_RW, page_nr(ptb11));
     pg_set_entry(&pgd1[2], PG_USR | PG_RW, page_nr(ptb12));
@@ -56,9 +69,8 @@ void init_pagination()
     pg_set_entry(&pgd2[1], PG_USR | PG_RW, page_nr(ptb21));
     pg_set_entry(&pgd2[2], PG_USR | PG_RW, page_nr(ptb22));
 
-    // set cr3 and cr0
-    set_cr3((uint32_t)pgd1);
-
+    // set cr3 and cr0 to pgd0 for now
+    set_cr3((uint32_t)pgd0);
     uint32_t cr0 = get_cr0();
     set_cr0(cr0 | CR0_PG);
 
@@ -79,12 +91,52 @@ void debug_pagination(int address)
     debug("Pagination privilege lvl: PGD#%d:%d and PTB#%d:%d\n", pdeidx, pdelvl, pteidx, ptelvl);
 }
 
-pde32_t *get_pgd1()
+pde32_t *get_pgd(int id)
 {
-    return pgd1;
+
+    if (id == 0)
+    {
+        return pgd0;
+    }
+    else if (id == 1)
+    {
+        return pgd1;
+    }
+    else
+    {
+        return pgd2;
+    }
 }
 
-pde32_t *get_pgd2()
-{
-    return pgd2;
-}
+// uint32_t kernel_stack0_base;
+// uint32_t set_kernel_stack(int id, uint32_t stack)
+// {
+//     if (id == 0)
+//     {
+//         kernel_stack0_base = stack;
+//     }
+//     else if (id == 1)
+//     {
+//         kernel_stack1_base = stack;
+//     }
+//     else
+//     {
+//         kernel_stack2_base = stack;
+//     }
+// }
+
+// uint32_t get_kernel_stack(int id)
+// {
+//     if (id == 0)
+//     {
+//         return kernel_stack0_base;
+//     }
+//     else if (id == 1)
+//     {
+//         return kernel_stack1_base;
+//     }
+//     else
+//     {
+//         return kernel_stack2_base;
+//     }
+// }

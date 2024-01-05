@@ -4,7 +4,8 @@
 #include <process.h>
 #include <memory_map.h>
 
-__attribute__((section(".user"))) void task1();
-__attribute__((section(".user"))) void task2();
+void task0();
+__attribute__((section(".user1"))) void task1();
+__attribute__((section(".user2"))) void task2();
 
 #endif

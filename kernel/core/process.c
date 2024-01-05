@@ -10,16 +10,8 @@ int current_process;
 
 void init_process_table()
 {
-
-    process_list[0].entry = 0;
-    process_list[0].esp = 0;
-    process_list[0].pgd = 0;
-    process_list[0].pid = 0;
-    process_list[0].ppid = 0;
-    process_list[0].started = true;
-
-    current_process = 0;
-    process_list_len = 1;
+    current_process = -1;
+    process_list_len = 0;
 }
 
 void create_process(process_t p)
@@ -28,23 +20,37 @@ void create_process(process_t p)
     process_list_len++;
 }
 
-void run_user_process(int id)
+void run_process(int id)
 {
-    debug("Run user task %d\n", id);
+    debug("Run process %d\n", id);
 
-    // Switch seg to ring 3
-    set_seg_to_user();
+    if (id > 0)
+    {
+        asm volatile(
+            "push %0 \n" // ss
+            "push %1 \n" // esp pour du ring 3 !
+            "pushf   \n" // eflags
+            "push %2 \n" // cs
+            "push %3 \n" // eip
+            ::"i"(d3_sel),
+            "m"(process_list[id].ebp),
+            "i"(c3_sel),
+            "r"(process_list[id].entry));
+    }
 
-    asm volatile(
-        "push %0 \n" // ss
-        "push %1 \n" // esp pour du ring 3 !
-        "pushf   \n" // eflags
-        "push %2 \n" // cs
-        "push %3 \n" // eip
-        ::"i"(d3_sel),
-        "m"(process_list[id].esp),
-        "i"(c3_sel),
-        "r"(process_list[id].entry));
+    else
+    {
+        asm volatile(
+            "push %0 \n" // ss
+            "push %1 \n" // esp
+            "pushf   \n" // eflags
+            "push %2 \n" // cs
+            "push %3 \n" // eip
+            ::"i"(d0_sel),
+            "m"(process_list[id].ebp),
+            "i"(c0_sel),
+            "r"(process_list[id].entry));
+    }
 
     outb(0x20, 0x20); // ack IRQ0
     asm volatile("iret");

@@ -11,14 +11,14 @@ typedef struct process_t
 	int ppid;
 	bool_t started;
 
-	uint32_t esp;
+	uint32_t ebp;
 	pde32_t *pgd;
 	void *entry;
 } process_t;
 
 void init_process_table();
 void create_process(process_t p);
-void run_user_process(int id);
+void run_process(int id);
 
 process_t *get_process_list();
 int get_process_list_len();
