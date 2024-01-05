@@ -26,7 +26,7 @@ void init_kernel()
     init_timer();
     force_interrupts_on();
 
-    //* DEBUG
+    /* DEBUG
     debug_gdt();
     debug("SS: %d\nStack @ 0x%x\nCS: %d\neip @ %p\n", d3_idx, stack1_base, c3_idx, task2);
     debug_pagination((int)task1);
