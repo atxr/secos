@@ -7,7 +7,7 @@ __attribute__((section(".user"))) void task1()
 	for (;;)
 	{
 		*counter += 1;
-		asm volatile("int $0x80" ::"a"(counter));
+		// asm volatile("int $0x80" ::"a"(counter));
 	}
 }
 

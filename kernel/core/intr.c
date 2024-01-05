@@ -73,16 +73,15 @@ void __regparm__(1) sys_handler_count(int_ctx_t *ctx)
 void isr_switch()
 {
    asm volatile(
-       "leave ; pusha ; cli     \n"
+       "leave ; pusha ;      \n"
        "call sys_handler_switch \n"
        "popa ; iret");
 }
 
 void sys_handler_switch()
 {
-   outb(0x20, 0x20); // ack IRQ0
+   debug("IRQ0: SWITCH process\n");
 
-   debug("SYS HANDLER SWITCH\n");
    int len = get_process_list_len();
 
    // Only kernel is running
@@ -125,7 +124,7 @@ void sys_handler_switch()
    }
 
 exit:
-   asm volatile("sti");
+   outb(0x20, 0x20); // ack IRQ0
 }
 
 void reg_syscall(int int_num, int isr)

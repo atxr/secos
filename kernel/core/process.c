@@ -2,6 +2,7 @@
 #include <segmem.h>
 #include <io.h>
 #include <debug.h>
+#include <timer.h>
 
 process_t process_list[PROCESS_MAX];
 int process_list_len;
@@ -33,6 +34,7 @@ void run_user_process(int id)
 
     // Switch seg to ring 3
     set_seg_to_user();
+
     asm volatile(
         "push %0 \n" // ss
         "push %1 \n" // esp pour du ring 3 !
@@ -43,8 +45,9 @@ void run_user_process(int id)
         "m"(process_list[id].esp),
         "i"(c3_sel),
         "r"(process_list[id].entry));
-    
-    asm volatile("sti\n iret");
+
+    outb(0x20, 0x20); // ack IRQ0
+    asm volatile("iret");
 }
 
 process_t *get_process_list()
@@ -64,6 +67,5 @@ int get_current_process()
 
 void set_current_process(int new_process)
 {
-    debug("Setting current process to %d\n", new_process);
     current_process = new_process;
 }
