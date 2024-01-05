@@ -1,19 +1,22 @@
 #include <segmem.h>
 #include <debug.h>
 
-seg_desc_t GDT[6];
-tss_t TSS;
+seg_desc_t GDT[7];
+tss_t TSS1;
+tss_t TSS2;
 
-void set_seg_to_user()
+void set_seg_to_user(int id)
 {
     set_ds(d3_sel);
     set_es(d3_sel);
     set_fs(d3_sel);
     set_gs(d3_sel);
-    TSS.s0.esp = get_ebp();
-    TSS.s0.ss = d0_sel;
-    tss_dsc(&GDT[ts_idx], (offset_t)&TSS);
-    set_tr(ts_sel);
+
+    if (id == 1)
+        set_tr(ts1_sel);
+
+    else
+        set_tr(ts2_sel);
 }
 
 void init_flat_seg()
@@ -26,6 +29,8 @@ void init_flat_seg()
     d0_dsc(&GDT[d0_idx]);
     c3_dsc(&GDT[c3_idx]);
     d3_dsc(&GDT[d3_idx]);
+    tss_dsc(&GDT[ts1_idx], (offset_t)&TSS1);
+    tss_dsc(&GDT[ts2_idx], (offset_t)&TSS2);
 
     gdtr.desc = GDT;
     gdtr.limit = sizeof(GDT) - 1;
@@ -38,6 +43,12 @@ void init_flat_seg()
     set_es(d0_sel);
     set_fs(d0_sel);
     set_gs(d0_sel);
+
+    TSS1.s0.esp = get_ebp();
+    TSS1.s0.ss = d0_sel;
+
+    TSS2.s0.esp = get_ebp();
+    TSS2.s0.ss = d0_sel;
 }
 
 void print_gdt_content(gdt_reg_t gdtr_ptr)
